@@ -1,0 +1,53 @@
+frontend/src/app.js
+
+import React, { useState, useEffect } from 'react';
+import './App.css';
+
+function App() {
+  const [tasks, setTasks] = useState([]);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+  const fetchTasks = async () => {
+    const response = await fetch(`${API_URL}/api/tasks`);
+    const data = await response.json();
+    setTasks(data);
+  };
+
+  const addTask = async (e) => {
+    e.preventDefault();
+    await fetch(`${API_URL}/api/tasks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description }),
+    });
+    setTitle('');
+    setDescription('');
+    fetchTasks();
+  };
+
+  useEffect(() => { fetchTasks(); }, []);
+
+  return (
+    <div className="App">
+      <h1>Cloud Task Manager</h1>
+      <form onSubmit={addTask}>
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Task title" required />
+        <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" />
+        <button type="submit">Add Task</button>
+      </form>
+      <div>
+        {tasks.map(task => (
+          <div key={task.id}>
+            <h3>{task.title}</h3>
+            <p>{task.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default App;
